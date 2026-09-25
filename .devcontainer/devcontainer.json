@@ -1,10 +1,10 @@
 {
-    "name": "LAMP",
+    "name": "PHPSiteEngine",
     "dockerComposeFile": "docker-compose.yml",
     "service": "php-app",
 
     "workspaceMount": "source=${localWorkspaceFolder},target=/PHPSiteEngine,type=bind",
-    "workspaceFolder": "/PHPSiteEngine",
+    "workspaceFolder": "/var/www/html",
 
     "initializeCommand": "bash -c 'ip -4 route get 1.1.1.1 2>/dev/null | awk \"{for (i = 1; i <= NF; i++) if (\\$i == \\\"src\\\") {print \\\"HOST_LAN_IP=\\\" \\$(i + 1); exit}}\" > .devcontainer/host.env'",
 
@@ -38,7 +38,9 @@
                 "editor.formatOnSave": true,
                 "php.validate.executablePath": "/usr/local/bin/php",
 
-                "claudeCode.initialPermissionMode": "plan"
+                "claudeCode.initialPermissionMode": "plan",
+
+                "git.scanRepositories": ["PHPSiteEngine"]
             }
         }
     },

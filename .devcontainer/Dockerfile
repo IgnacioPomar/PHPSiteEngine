@@ -56,4 +56,4 @@ RUN useradd -m -s /bin/bash vscode \
     && mkdir -p /home/vscode/.ssh \
     && chown -R vscode:vscode /home/vscode
 
-WORKDIR /workspace
+WORKDIR /PHPSiteEngine
