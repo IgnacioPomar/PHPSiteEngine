@@ -32,9 +32,10 @@ In both cases, these are the parameters
 | Var  | Value |
 | ------------- | ------------- |
 | $GLOBALS ['Version']  | Just to check if a reinstall is mandatory  |
-| $GLOBALS ['authRecover']  | [TRUE/FALSE] allows the user to recover the password with the stored email  |
-| $GLOBALS ['authLog']  | Stores the last user logins  |
-| $GLOBALS ['menuType']  | [0/1] Use a fixed json menu, or iuse in database menu |
+| $GLOBALS ['authAllowRecover']  | [TRUE/FALSE] allows the user to recover the password with the stored email  |
+| $GLOBALS ['authAllowAppLogins']  | [TRUE/FALSE] allows login through the API (non-browser clients)  |
+| $GLOBALS ['authKeepLogged']  | [TRUE/FALSE] keeps the user logged in via a persistent cookie  |
+| $GLOBALS ['menuType']  | [0/1] Use a fixed json menu, or use a database menu. Default/recommended: `1` (database), since it needs no extra file and the installer/admin UI manage it directly |
 | $GLOBALS ['dbserver']  | Mariadb Server  |
 | $GLOBALS ['dbport']  | database Port
 | $GLOBALS ['dbuser']  | database user
@@ -42,7 +43,7 @@ In both cases, these are the parameters
 | $GLOBALS ['dbname']  | database
 | $GLOBALS ['plgs']  | Path, retaive to rootPath, with the plugins |
 | $GLOBALS ['skin']  |  Path, retaive to rootPath, with the skin
-| $GLOBALS ['jsonMenu']  | Thejson menu to use (only if menuType == 0) |
+| $GLOBALS ['jsonMenu']  | The json menu to use (only if menuType == 0). Defaults to `mainMenu.json`, looked up relative to the config folder (e.g. `cfg/mainMenu.json`) |
 
  
  

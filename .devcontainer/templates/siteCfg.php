@@ -5,9 +5,10 @@
 
 $GLOBALS ['Version'] = '0.3';
 
-$GLOBALS ['authRecover'] = TRUE;
-$GLOBALS ['authLog'] = TRUE;
-$GLOBALS ['menuType'] = '0';
+$GLOBALS ['authAllowRecover'] = TRUE;
+$GLOBALS ['authAllowAppLogins'] = FALSE;
+$GLOBALS ['authKeepLogged'] = TRUE;
+$GLOBALS ['menuType'] = '1';
 
 $GLOBALS ['dbserver'] = 'db';
 $GLOBALS ['dbport'] = '3306';

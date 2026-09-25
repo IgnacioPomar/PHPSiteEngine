@@ -7,8 +7,9 @@
 $GLOBALS ['Version'] = '0.3';
 
 // Options
-$GLOBALS ['authRecover'] = @@authRecover@@;
-$GLOBALS ['authLog'] = @@authLog@@;
+$GLOBALS ['authAllowRecover'] = @@authAllowRecover@@;
+$GLOBALS ['authAllowAppLogins'] = FALSE;
+$GLOBALS ['authKeepLogged'] = TRUE;
 $GLOBALS ['menuType'] = @@menuType@@;
 
 // ----------------------------------

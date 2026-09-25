@@ -25,7 +25,8 @@ class MenuLoaderJson
 
 	public static function loadFromFile ($menuFile, Menu &$menu)
 	{
-		$menu->setMenuOpc (json_decode (file_get_contents ($menuFile), true));
+		$opcs = file_exists ($menuFile) ? json_decode (file_get_contents ($menuFile), true) : null;
+		$menu->setMenuOpc ($opcs);
 		$menu->isEditable = false;
 	}
 }

@@ -8,6 +8,15 @@ use PHPMailer\PHPMailer\Exception;
 require_once 'libphp-phpmailer/autoload.php';
 
 
+/**
+ * URL-safe base64 encoding (no padding, '+'/'/' replaced by '-'/'_')
+ */
+function base64url_encode ($data)
+{
+	return rtrim (strtr (base64_encode ($data), '+/', '-_'), '=');
+}
+
+
 function smtpSend ($email, $subject, $body, $bodyTxt)
 {
 	$mail = new PHPMailer (true);
@@ -75,13 +84,13 @@ function sendRecoverEmail ($email, $pass)
 
 	$subject = $GLOBALS ['recoverySubject'];
 
-	$msg = file_get_contents ($GLOBALS ['skinPath'] . $emlRecoverFile);
+	$msg = file_get_contents ($emlRecoverFile);
 	$msg = str_replace ('@@recoverCode@@', $pass, $msg);
 	$msg = str_replace ('@@recoverLink@@', $link, $msg);
 
-	$msgtxt = file_get_contents ($GLOBALS ['skinPath'] . $emlTxtRecoverFile);
-	$msgtxt = str_replace ('@@recoverCode@@', $pass, $msg);
-	$msgtxt = str_replace ('@@recoverLink@@', $link, $msg);
+	$msgtxt = file_get_contents ($emlTxtRecoverFile);
+	$msgtxt = str_replace ('@@recoverCode@@', $pass, $msgtxt);
+	$msgtxt = str_replace ('@@recoverLink@@', $link, $msgtxt);
 
 	smtpSend ($email, $subject, $msg, $msgtxt);
 }

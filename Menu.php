@@ -33,8 +33,27 @@ class Menu
 
 	public function setMenuOpc ($arrOpcs)
 	{
-		$this->arrOpcs = $arrOpcs;
+		$this->arrOpcs = empty ($arrOpcs) ? self::getEmptyMenu () : $arrOpcs;
 		$this->setSelectedOpc ($this->arrOpcs);
+	}
+
+
+	/**
+	 * Fallback menu used when no menu source provides any option
+	 * (empty/missing json file, or an empty weMenu table), so the
+	 * root path still resolves to a selectable option instead of a 404.
+	 */
+	private static function getEmptyMenu ()
+	{
+		return [
+			[
+				'opc' => '/',
+				'name' => 'Home',
+				'tmplt' => 'skel.htm',
+				'plg' => '',
+				'show' => true
+			]
+		];
 	}
 
 

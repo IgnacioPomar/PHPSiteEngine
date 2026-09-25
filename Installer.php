@@ -391,8 +391,7 @@ class Installer
 		$cfgFile = str_replace ('@@skins@@', var_export ($_POST ['skins'], true), $cfgFile);
 
 		$cfgFile = str_replace ('@@menuType@@', var_export ($_POST ['mnu'], true), $cfgFile);
-		$cfgFile = str_replace ('@@authLog@@', isset ($_POST ['authLog']) ? 'TRUE' : 'FALSE', $cfgFile);
-		$cfgFile = str_replace ('@@authRecover@@', isset ($_POST ['authRecover']) ? 'TRUE' : 'FALSE', $cfgFile);
+		$cfgFile = str_replace ('@@authAllowRecover@@', isset ($_POST ['authRecover']) ? 'TRUE' : 'FALSE', $cfgFile);
 
 		if (! file_put_contents (Site::$cfgFile, $cfgFile))
 		{

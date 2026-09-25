@@ -10,6 +10,7 @@ class WebEngine
 	const HARDCODED_PLUGINS = array(
 			// 'name' => 'path',
 			'/Logout'		=> ['file' =>'PlgsStd/Logout.php', 'class' => 'Logout'],
+			'/'				=> ['file' =>'PlgsStd/EmptyContent.php', 'class' => 'EmptyContent'],
 	);
 	
 	// @formatter:on
@@ -84,49 +85,46 @@ class WebEngine
 	private function loadPlugin (): Plugin
 	{
 		$mnu = &$this->context->mnu;
-		if (! $mnu->hasOpcSelected ())
+
+		if ($mnu->hasOpcSelected ())
 		{
-			if (isset (self::HARDCODED_PLUGINS [$mnu->subPath]))
+			$class = $mnu->getPlugin ();
+			if ($resultado = $this->context->mysqli->query ("SELECT plgFile, plgParams, plgPerms FROM wePlugins WHERE plgName='$class';"))
 			{
-				$plgInfo = self::HARDCODED_PLUGINS [$mnu->subPath];
+				if ($row = $resultado->fetch_assoc ())
+				{
+					require_once (Site::$plgsPath . $row ['plgFile']);
+					$plg = new $class ($this->context);
 
-				require_once ($plgInfo ['file']);
-				$plgName = 'PHPSiteEngine\\PlgsStd\\' . $plgInfo ['class'];
-				$plg = new $plgName ($this->context);
-				// Harcoded plugins dont have nor params nor permmisions
+					if (strlen ($row ['plgParams']) > 2)
+					{
+						$plg->checkParams ();
+					}
 
-				$mnu->stCurrOpc ([ 'opc' => $mnu->subPath, 'tmplt' => 'skel.htm', 'name' => $plgInfo ['class']]);
+					if (strlen ($row ['plgPerms']) > 2)
+					{
+						$plg->checkPerms ();
+					}
 
-				return $plg;
-			}
-			else
-			{
-
-				require_once (Site::$nsPath . 'Fake404.php');
-				Fake404::main ();
+					return $plg;
+				}
 			}
 		}
 
-		$class = $mnu->getPlugin ();
-		if ($resultado = $this->context->mysqli->query ("SELECT plgFile, plgParams, plgPerms FROM wePlugins WHERE plgName='$class';"))
+		// No menu-configured plugin matched (either the URL has no menu option,
+		// or it does but no plugin is registered for it yet): try a system plugin.
+		if (isset (self::HARDCODED_PLUGINS [$mnu->subPath]))
 		{
-			if ($row = $resultado->fetch_assoc ())
-			{
-				require_once (Site::$plgsPath . $row ['plgFile']);
-				$plg = new $class ($this->context);
+			$plgInfo = self::HARDCODED_PLUGINS [$mnu->subPath];
 
-				if (strlen ($row ['plgParams']) > 2)
-				{
-					$plg->checkParams ();
-				}
+			require_once (Site::$nsPath . $plgInfo ['file']);
+			$plgName = 'PHPSiteEngine\\PlgsStd\\' . $plgInfo ['class'];
+			$plg = new $plgName ($this->context);
+			// Harcoded plugins dont have nor params nor permmisions
 
-				if (strlen ($row ['plgPerms']) > 2)
-				{
-					$plg->checkPerms ();
-				}
+			$mnu->stCurrOpc ([ 'opc' => $mnu->subPath, 'tmplt' => 'skel.htm', 'name' => $plgInfo ['class']]);
 
-				return $plg;
-			}
+			return $plg;
 		}
 
 		// If we arrive here, means we have no plugin installed
