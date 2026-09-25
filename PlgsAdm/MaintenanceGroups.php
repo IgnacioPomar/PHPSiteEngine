@@ -33,8 +33,7 @@ class MaintenanceGroups extends Plugin
 	 */
 	private function showListGroups ()
 	{
-		$query = $this->getQueryGroups ();
-		$resultGroups = $this->context->mysqli->query ($query);
+		$resultGroups = $this->runQueryGroups ();
 
 		$formatter = new ColumnFormatter (self::COLS_TABLE_GROUPS);
 
@@ -63,17 +62,21 @@ class MaintenanceGroups extends Plugin
 	/**
 	 *
 	 * @param number $idGroup
-	 * @return string
+	 * @return \mysqli_result|false
 	 */
-	private function getQueryGroups ($idGroup = 0)
+	private function runQueryGroups ($idGroup = 0)
 	{
 		// YAGNI: Receive an array with the necessary columns
-		$query = 'SELECT * FROM weGroups';
+		$idGroup = (int) $idGroup;
 		if ($idGroup != 0)
 		{
-			$query .= " WHERE idGrp = $idGroup";
+			$stmt = $this->context->mysqli->prepare ('SELECT * FROM weGroups WHERE idGrp = ?');
+			$stmt->bind_param ('i', $idGroup);
+			$stmt->execute ();
+			return $stmt->get_result ();
 		}
-		return $query;
+
+		return $this->context->mysqli->query ('SELECT * FROM weGroups');
 	}
 
 
@@ -104,8 +107,7 @@ class MaintenanceGroups extends Plugin
 
 		if (! empty ($_GET ['idGrp']))
 		{
-			$query = $this->getQueryGroups ($_GET ['idGrp']);
-			if ($resultGroup = $this->context->mysqli->query ($query))
+			if ($resultGroup = $this->runQueryGroups ($_GET ['idGrp']))
 			{
 				if ($group = $resultGroup->fetch_assoc ())
 				{

@@ -337,15 +337,18 @@ class EditMenu extends Plugin
 			$paramValues [$param ['name']] = $_POST [$param ['name']];
 		}
 
-		$paramValuesStr = $this->context->mysqli->real_escape_string (json_encode ($paramValues));
+		$paramValuesStr = json_encode ($paramValues);
 		$plg = $nodeVals ['opc'] ['plg'];
 
 		$sql = 'INSERT INTO wePlgParams (mnuNode,plgName,paramValues)';
-		$sql .= " VALUES ('$node','$plg','$paramValuesStr')";
-		$sql .= "ON DUPLICATE KEY UPDATE paramValues='$paramValuesStr'";
+		$sql .= ' VALUES (?,?,?)';
+		$sql .= ' ON DUPLICATE KEY UPDATE paramValues=?';
+
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('ssss', $node, $plg, $paramValuesStr, $paramValuesStr);
 
 		$retVal = "<h1>Saving node parameters [$node]</h1>";
-		if (! $this->context->mysqli->query ($sql))
+		if (! $stmt->execute ())
 		{
 			$retVal .= '<p class="error">Failed to save new parameters.</p>';
 		}
@@ -376,8 +379,11 @@ class EditMenu extends Plugin
 
 		// Load current Values
 		$vals = '[]';
-		$sql = 'SELECT paramValues FROM wePlgParams WHERE plgName="' . $opc ['plg'] . '" AND mnuNode="' . $node . '";';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$sql = 'SELECT paramValues FROM wePlgParams WHERE plgName=? AND mnuNode=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('ss', $opc ['plg'], $node);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($row = $resultado->fetch_assoc ())
 			{
@@ -387,8 +393,11 @@ class EditMenu extends Plugin
 
 		// Load Parameters definition
 		$definition = '[]';
-		$sql = 'SELECT plgParams FROM wePlugins WHERE plgName="' . $opc ['plg'] . '";';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$sql = 'SELECT plgParams FROM wePlugins WHERE plgName=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $opc ['plg']);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($row = $resultado->fetch_assoc ())
 			{

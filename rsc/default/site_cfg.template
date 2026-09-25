@@ -9,20 +9,20 @@ $GLOBALS ['Version'] = '0.3';
 // Options
 $GLOBALS ['authRecover'] = @@authRecover@@;
 $GLOBALS ['authLog'] = @@authLog@@;
-$GLOBALS ['menuType'] = '@@menuType@@';
+$GLOBALS ['menuType'] = @@menuType@@;
 
 // ----------------------------------
 // Database CFG
-$GLOBALS ['dbserver'] = '@@dbserver@@';
-$GLOBALS ['dbport'] = '@@dbport@@';
-$GLOBALS ['dbuser'] = '@@dbuser@@';
-$GLOBALS ['dbpass'] = '@@dbpass@@';
-$GLOBALS ['dbname'] = '@@dbname@@';
+$GLOBALS ['dbserver'] = @@dbserver@@;
+$GLOBALS ['dbport'] = @@dbport@@;
+$GLOBALS ['dbuser'] = @@dbuser@@;
+$GLOBALS ['dbpass'] = @@dbpass@@;
+$GLOBALS ['dbname'] = @@dbname@@;
 
 // ----------------------------------
 
-$GLOBALS ['plgs'] = '@@plgs@@';
-$GLOBALS ['skin'] = '@@skins@@';
+$GLOBALS ['plgs'] = @@plgs@@;
+$GLOBALS ['skin'] = @@skins@@;
 
 // ----------------------------------
 define ('SERVER_ENCODING', 'UTF-8');

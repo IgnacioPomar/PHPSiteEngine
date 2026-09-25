@@ -111,9 +111,12 @@ class Auth
 	public static function isAdmin ($mysqli, $userId): bool
 	{
 		$retVal = false;
-		$consulta = "SELECT isAdmin FROM weUsers WHERE idUser = '$userId';";
+		$consulta = 'SELECT isAdmin FROM weUsers WHERE idUser = ?';
 
-		if ($res = $mysqli->query ($consulta))
+		$stmt = $mysqli->prepare ($consulta);
+		$stmt->bind_param ('s', $userId);
+		$stmt->execute ();
+		if ($res = $stmt->get_result ())
 		{
 			if ($row = $res->fetch_assoc ())
 			{
@@ -134,9 +137,12 @@ class Auth
 	private function checkIfUserIsActive ($userId): bool
 	{
 		$retVal = FALSE;
-		$consulta = "SELECT isActive, name FROM weUsers WHERE idUser = '$userId';";
+		$consulta = 'SELECT isActive, name FROM weUsers WHERE idUser = ?';
 
-		if ($resultado = $this->mysqli->query ($consulta))
+		$stmt = $this->mysqli->prepare ($consulta);
+		$stmt->bind_param ('s', $userId);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($resultado->num_rows > 0)
 			{
@@ -167,8 +173,10 @@ class Auth
 	 */
 	private function extendCoockieLife ($cookieId)
 	{
-		$sql = "UPDATE weSessCookie SET expires= NOW() + INTERVAL 30 DAY WHERE cookieId = '$cookieId';";
-		$this->mysqli->query ($sql);
+		$sql = 'UPDATE weSessCookie SET expires= NOW() + INTERVAL 30 DAY WHERE cookieId = ?';
+		$stmt = $this->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $cookieId);
+		$stmt->execute ();
 	}
 
 
@@ -192,13 +200,15 @@ class Auth
 	private function checkStaticPass ($staticPass, $extendLifeTime, $useCookie)
 	{
 		list ($cookieId, $cookiePass) = explode ('@', $staticPass);
-		$cookieId = $this->mysqli->real_escape_string ($cookieId);
 
-		$consulta = "SELECT cookiePass, realUserId FROM weSessCookie WHERE cookieId ='$cookieId'";
+		$consulta = 'SELECT cookiePass, realUserId FROM weSessCookie WHERE cookieId = ?';
 
 		// TODO: Considerar usar la información de browser INFo para comprobar si es una sesión válida
 		$retVal = false;
-		if ($resultado = $this->mysqli->query ($consulta))
+		$stmt = $this->mysqli->prepare ($consulta);
+		$stmt->bind_param ('s', $cookieId);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($resultado->num_rows > 0)
 			{
@@ -319,8 +329,11 @@ class Auth
 				if ((isset ($_POST ['appIdUser'])) && (isset ($_POST ['appIdPass'])))
 				{
 
-					$sql = 'SELECT idUser, password FROM weUsers WHERE isActive=1 AND email="' . $_POST ['appIdUser'] . '"';
-					if ($res = $this->mysqli->query ($sql))
+					$sql = 'SELECT idUser, password FROM weUsers WHERE isActive=1 AND email=?';
+					$stmt = $this->mysqli->prepare ($sql);
+					$stmt->bind_param ('s', $_POST ['appIdUser']);
+					$stmt->execute ();
+					if ($res = $stmt->get_result ())
 					{
 						if ($row = $res->fetch_assoc ())
 						{
@@ -402,14 +415,17 @@ class Auth
 		// Primero obtenemos los valores unicos para esta sesion
 		$cookieId = uniqid ('', true); // menos de 30 caracteres
 		$cookiePass = mt_rand (100000000, 999999999);
-		$browserId = $this->mysqli->real_escape_string ($_SERVER ['HTTP_USER_AGENT']);
 		$browserId = $_SERVER ['HTTP_USER_AGENT'];
 
-		$consulta = "INSERT INTO weSessCookie (cookieId,cookiePass,realUserId,firstAccess,expires,browserInfo)
-		VALUES (\"$cookieId\",\"$cookiePass\",'$userId',NOW(),NOW() + INTERVAL 30 DAY,\"$browserId\");
-		";
+		$consulta = 'INSERT INTO weSessCookie (cookieId,cookiePass,realUserId,firstAccess,expires,browserInfo)
+		VALUES (?,?,?,NOW(),NOW() + INTERVAL 30 DAY,?);
+		';
 
-		if ($this->mysqli->query ($consulta))
+		$stmt = $this->mysqli->prepare ($consulta);
+		$cookiePassStr = (string) $cookiePass;
+		$stmt->bind_param ('ssss', $cookieId, $cookiePassStr, $userId, $browserId);
+
+		if ($stmt->execute ())
 		{
 			if ($setCookie)
 			{
@@ -431,10 +447,12 @@ class Auth
 		$retVal = FALSE;
 		if (isset ($_POST ['user']))
 		{
-			$usuario = $this->mysqli->real_escape_string ($_POST ['user']);
-			$consulta = 'SELECT idUser, name, password, isActive FROM weUsers WHERE email="' . $usuario . '"';
+			$consulta = 'SELECT idUser, name, password, isActive FROM weUsers WHERE email=?';
 
-			if ($resultado = $this->mysqli->query ($consulta))
+			$stmt = $this->mysqli->prepare ($consulta);
+			$stmt->bind_param ('s', $_POST ['user']);
+			$stmt->execute ();
+			if ($resultado = $stmt->get_result ())
 			{
 				if ($resultado->num_rows > 0)
 				{
@@ -524,9 +542,14 @@ class Auth
 		{
 
 			$cookie = explode ("@", $_COOKIE ['SecurityCookie']);
-			// Primero eliminamos nuestra cookie actual
-			$consulta = 'DELETE FROM weSessCookie WHERE cookieId = "' . $cookie [0] . '" AND cookiePass = "' . $cookie [1] . '";';
-			$this->mysqli->query ($consulta);
+			if (isset ($cookie [1]))
+			{
+				// Primero eliminamos nuestra cookie actual
+				$consulta = 'DELETE FROM weSessCookie WHERE cookieId = ? AND cookiePass = ?';
+				$stmt = $this->mysqli->prepare ($consulta);
+				$stmt->bind_param ('ss', $cookie [0], $cookie [1]);
+				$stmt->execute ();
+			}
 		}
 
 		if (! isset ($_SESSION)) session_start ();
@@ -635,12 +658,15 @@ class Auth
 	private function checkAndStoreNewPass ()
 	{
 		// Check the used code is valid
-		$email = $this->mysqli->real_escape_string ($_POST ['recoverEmail']);
-		$sql = 'SELECT idUser,recoveryPass FROM weUsers WHERE email="' . $email . '" AND recoveryDate> NOW();';
+		$email = $_POST ['recoverEmail'];
+		$sql = 'SELECT idUser,recoveryPass FROM weUsers WHERE email=? AND recoveryDate> NOW()';
 
 		$idUsr = NULL;
 		$isValid = false;
-		if ($resultado = $this->mysqli->query ($sql))
+		$stmt = $this->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $email);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($resultado->num_rows > 0)
 			{
@@ -662,10 +688,12 @@ class Auth
 		}
 		else
 		{
-			$dbPass = $this->mysqli->real_escape_string (password_hash ($_POST ['newPass'], 1));
+			$dbPass = password_hash ($_POST ['newPass'], 1);
 
-			$sql = 'UPDATE weUsers SET password="' . $dbPass . '", recoveryPass="", isActive=true WHERE email = "' . $email . '";';
-			$this->mysqli->query ($sql);
+			$sql = 'UPDATE weUsers SET password=?, recoveryPass="", isActive=true WHERE email = ?';
+			$stmt = $this->mysqli->prepare ($sql);
+			$stmt->bind_param ('ss', $dbPass, $email);
+			$stmt->execute ();
 			return $idUsr;
 		}
 	}
@@ -685,11 +713,14 @@ class Auth
 		$currRecoverPass = '';
 		$mustSendEmail = true;
 		$mustGenerateNewRecoverPass = true;
-		$sqlEml = $this->mysqli->real_escape_string ($email);
+		$sqlEml = $email;
 		$sql = 'SELECT recoveryPass, recoveryDate > NOW() AS withRecoverPassword, (recoveryDate - INTERVAL 30 MINUTE)> NOW()  AS isNewRecoverPassword';
-		$sql .= " FROM weUsers WHERE email='$sqlEml'";
+		$sql .= ' FROM weUsers WHERE email=?';
 
-		if ($res = $this->mysqli->query ($sql))
+		$stmt = $this->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $sqlEml);
+		$stmt->execute ();
+		if ($res = $stmt->get_result ())
 		{
 			if ($res->num_rows > 0)
 			{
@@ -717,8 +748,10 @@ class Auth
 		if ($mustGenerateNewRecoverPass)
 		{
 			$currRecoverPass = rtrim (base64_encode (random_bytes (14)), '=');
-			$sql = 'UPDATE weUsers SET recoveryPass="' . $currRecoverPass . '", recoveryDate= (NOW()+INTERVAL 30 MINUTE) WHERE email = "' . $sqlEml . '";';
-			$this->mysqli->query ($sql);
+			$sql = 'UPDATE weUsers SET recoveryPass=?, recoveryDate= (NOW()+INTERVAL 30 MINUTE) WHERE email = ?';
+			$stmt = $this->mysqli->prepare ($sql);
+			$stmt->bind_param ('ss', $currRecoverPass, $sqlEml);
+			$stmt->execute ();
 		}
 
 		// Send the recover password email

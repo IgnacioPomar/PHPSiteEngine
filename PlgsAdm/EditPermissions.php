@@ -60,33 +60,40 @@ class EditPermissions extends Plugin
 	}
 
 
-	private function savePermsCommon ($sqlStart, $idElem)
+	private function savePermsCommon ($sqlStart, $idElem, $idElemType)
 	{
-		$sep = '';
-		$sql = $sqlStart;
+		$idElem = ($idElemType === 'i') ? (int) $idElem : (string) $idElem;
+
+		$placeholders = array ();
+		$types = '';
+		$params = array ();
+
 		foreach ($_POST as $key => $val)
 		{
 			if (substr ($key, 0, 4) === 'b64@')
 			{
-
 				$id = self::inputIdDecode ($key);
 
-				$sql .= $sep . PHP_EOL . '(';
-				$sql .= '"' . $this->context->mysqli->real_escape_string ($id ['node']) . '",';
-				$sql .= '"' . $this->context->mysqli->real_escape_string ($id ['plg']) . '",';
-				$sql .= $idElem . ',';
-				$sql .= '"' . $this->context->mysqli->real_escape_string ($id ['perm']) . '",';
-				$sql .= $val . ')';
-
-				$sep = ',';
+				$placeholders [] = '(?, ?, ?, ?, ?)';
+				$types .= 'ss' . $idElemType . 'si';
+				$params [] = $id ['node'];
+				$params [] = $id ['plg'];
+				$params [] = $idElem;
+				$params [] = $id ['perm'];
+				$params [] = (int) $val;
 			}
 		}
-		if ($sep == ',')
+
+		if (count ($placeholders) > 0)
 		{
+			$sql = $sqlStart . PHP_EOL . implode (',' . PHP_EOL, $placeholders);
 			$sql .= 'ON DUPLICATE KEY UPDATE permValue=VALUES(permValue)';
 
+			$stmt = $this->context->mysqli->prepare ($sql);
+			$stmt->bind_param ($types, ...$params);
+
 			$retVal = "<h1>Saving Permissions</h1>";
-			if (! $this->context->mysqli->query ($sql))
+			if (! $stmt->execute ())
 			{
 				$retVal .= '<p class="error">Failed saving permissions.</p>';
 			}
@@ -105,14 +112,14 @@ class EditPermissions extends Plugin
 	private function saveGrpPerms ()
 	{
 		$sql = 'INSERT INTO wePermissionsGroup (mnuNode,plgName,idGrp,permName, permValue) VALUES';
-		return $this->savePermsCommon ($sql, $_POST ['idGrp']);
+		return $this->savePermsCommon ($sql, $_POST ['idGrp'], 'i');
 	}
 
 
 	private function saveUsrPerms ()
 	{
 		$sql = 'INSERT INTO wePermissionsUsers (mnuNode,plgName,idUser,permName, permValue) VALUES';
-		return $this->savePermsCommon ($sql, $_POST ['idUsr']);
+		return $this->savePermsCommon ($sql, $_POST ['idUsr'], 's');
 	}
 
 
@@ -281,8 +288,12 @@ class EditPermissions extends Plugin
 	private function loadCurrentGroupPerms ($idGrp)
 	{
 		$this->currentPerms = array ();
-		$sql = 'SELECT * FROM wePermissionsGroup WHERE idGrp=' . $idGrp . ';';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$idGrp = (int) $idGrp;
+		$sql = 'SELECT * FROM wePermissionsGroup WHERE idGrp=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('i', $idGrp);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
@@ -295,8 +306,11 @@ class EditPermissions extends Plugin
 	private function loadCurrentUserPerms ($idUsr)
 	{
 		$this->currentPerms = array ();
-		$sql = 'SELECT * FROM wePermissionsUsers WHERE idUser=' . $idUsr . ';';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$sql = 'SELECT * FROM wePermissionsUsers WHERE idUser=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $idUsr);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
@@ -311,8 +325,11 @@ class EditPermissions extends Plugin
 		$this->efectivePerms = array ();
 		$sql = 'SELECT MIN(permValue) as permValue,mnuNode,plgName,permName ';
 		$sql .= 'FROM wePermissionsGroup WHERE permValue<>0 AND idGrp IN ';
-		$sql .= "(SELECT idGrp FROM weUsersGroups WHERE idUser = $idUsr) GROUP BY mnuNode,plgName,permName;";
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$sql .= '(SELECT idGrp FROM weUsersGroups WHERE idUser = ?) GROUP BY mnuNode,plgName,permName';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $idUsr);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
@@ -326,8 +343,12 @@ class EditPermissions extends Plugin
 	{
 		// Load group name
 		$grpName = '';
-		$sql = 'SELECT grpName FROM weGroups WHERE idGrp=' . $_GET ['idGrp'] . ';';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$idGrp = (int) $_GET ['idGrp'];
+		$sql = 'SELECT grpName FROM weGroups WHERE idGrp=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('i', $idGrp);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($row = $resultado->fetch_assoc ())
 			{
@@ -335,7 +356,7 @@ class EditPermissions extends Plugin
 			}
 		}
 
-		$hiddenInput = '<input type="hidden" name="idGrp" value="' . $_GET ['idGrp'] . '" />';
+		$hiddenInput = '<input type="hidden" name="idGrp" value="' . $idGrp . '" />';
 
 		return $this->getMainMenu ('group <hlight>' . $grpName . '</hlight>', $hiddenInput);
 	}
@@ -345,10 +366,14 @@ class EditPermissions extends Plugin
 	{
 		// Load group name
 		$usrName = '';
+		$idUsr = $_GET ['idUsr'];
 		$sql = 'SELECT u.name,g.groups FROM weUsers u ';
 		$sql .= ' LEFT JOIN  (SELECT GROUP_CONCAT(grpName  SEPARATOR ", ") AS groups, rel.idUser FROM weGroups g INNER JOIN weUsersGroups rel ON g.idGrp = rel.idGrp GROUP BY rel.idUser) g';
-		$sql .= ' ON u.idUser=g.idUser WHERE u.idUser=' . $_GET ['idUsr'] . ';';
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$sql .= ' ON u.idUser=g.idUser WHERE u.idUser=?';
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('s', $idUsr);
+		$stmt->execute ();
+		if ($resultado = $stmt->get_result ())
 		{
 			if ($row = $resultado->fetch_assoc ())
 			{
@@ -357,7 +382,7 @@ class EditPermissions extends Plugin
 			}
 		}
 
-		$hiddenInput = '<input type="hidden" name="idUsr" value="' . $_GET ['idUsr'] . '" />';
+		$hiddenInput = '<input type="hidden" name="idUsr" value="' . $idUsr . '" />';
 
 		return $this->getMainMenu ('user <hlight>' . $usrName . '</hlight> (<dlight>' . $usrGroups . '</dlight>)', $hiddenInput);
 	}

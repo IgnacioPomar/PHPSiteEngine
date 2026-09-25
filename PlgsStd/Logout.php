@@ -14,9 +14,14 @@ class Logout extends Plugin
 		{
 
 			$cookie = explode ("@", $_COOKIE ['SecurityCookie']);
-			// DElete from Database
-			$consulta = 'DELETE FROM weSessCookie WHERE cookieId = "' . $cookie [0] . '" AND cookiePass = "' . $cookie [1] . '";';
-			$this->context->mysqli->query ($consulta);
+			if (isset ($cookie [1]))
+			{
+				// DElete from Database
+				$consulta = 'DELETE FROM weSessCookie WHERE cookieId = ? AND cookiePass = ?';
+				$stmt = $this->context->mysqli->prepare ($consulta);
+				$stmt->bind_param ('ss', $cookie [0], $cookie [1]);
+				$stmt->execute ();
+			}
 
 			// Delete in the browser
 			unset ($_COOKIE ['SecurityCookie']);

@@ -324,15 +324,16 @@ class Installer
 	 */
 	public function addInitialData (&$out)
 	{
-		$sqlCmd = 'INSERT INTO weUsers (idUser, name, email, password, isActive, isAdmin) VALUES (';
-		$sqlCmd .= '"' . UUIDv7::generateBase64 () . '",';
-		$sqlCmd .= '"' . $_POST ['adminname'] . '",';
-		$sqlCmd .= '"' . $_POST ['adminlogin'] . '",';
-		$sqlCmd .= '"' . password_hash ($_POST ['adminpass1'], PASSWORD_DEFAULT) . '",';
-		$sqlCmd .= '1,1);';
+		$sqlCmd = 'INSERT INTO weUsers (idUser, name, email, password, isActive, isAdmin) VALUES (?, ?, ?, ?, 1, 1)';
+
+		$idUser = UUIDv7::generateBase64 ();
+		$passwordHash = password_hash ($_POST ['adminpass1'], PASSWORD_DEFAULT);
+
+		$stmt = $this->mysqli->prepare ($sqlCmd);
+		$stmt->bind_param ('ssss', $idUser, $_POST ['adminname'], $_POST ['adminlogin'], $passwordHash);
 
 		// Finalmente, insertamos el nuevo registro
-		if ($this->mysqli->query ($sqlCmd) === TRUE)
+		if ($stmt->execute ())
 		{
 			$out .= '<div class="ok">Creating admin credentials:  <b>OK</b></div>';
 			return TRUE;
@@ -379,15 +380,17 @@ class Installer
 		// TODO: Detect and apply the modules (auth....)
 		$outputSkin = Site::$rscPath . 'default/site_cfg.template';
 		$cfgFile = file_get_contents ($outputSkin);
-		$cfgFile = str_replace ('@@dbserver@@', $_POST ['dbserver'], $cfgFile);
-		$cfgFile = str_replace ('@@dbport@@', $_POST ['dbport'], $cfgFile);
-		$cfgFile = str_replace ('@@dbuser@@', $_POST ['dbuser'], $cfgFile);
-		$cfgFile = str_replace ('@@dbpass@@', $_POST ['dbpass'], $cfgFile);
-		$cfgFile = str_replace ('@@dbname@@', $_POST ['dbname'], $cfgFile);
-		$cfgFile = str_replace ('@@plgs@@', $_POST ['plgs'], $cfgFile);
-		$cfgFile = str_replace ('@@skins@@', $_POST ['skins'], $cfgFile);
+		// Each value is embedded via var_export() so it becomes a safe, self-quoted PHP literal,
+		// no matter what characters (quotes, backslashes, ';') it contains.
+		$cfgFile = str_replace ('@@dbserver@@', var_export ($_POST ['dbserver'], true), $cfgFile);
+		$cfgFile = str_replace ('@@dbport@@', var_export ((int) $_POST ['dbport'], true), $cfgFile);
+		$cfgFile = str_replace ('@@dbuser@@', var_export ($_POST ['dbuser'], true), $cfgFile);
+		$cfgFile = str_replace ('@@dbpass@@', var_export ($_POST ['dbpass'], true), $cfgFile);
+		$cfgFile = str_replace ('@@dbname@@', var_export ($_POST ['dbname'], true), $cfgFile);
+		$cfgFile = str_replace ('@@plgs@@', var_export ($_POST ['plgs'], true), $cfgFile);
+		$cfgFile = str_replace ('@@skins@@', var_export ($_POST ['skins'], true), $cfgFile);
 
-		$cfgFile = str_replace ('@@menuType@@', $_POST ['mnu'], $cfgFile);
+		$cfgFile = str_replace ('@@menuType@@', var_export ($_POST ['mnu'], true), $cfgFile);
 		$cfgFile = str_replace ('@@authLog@@', isset ($_POST ['authLog']) ? 'TRUE' : 'FALSE', $cfgFile);
 		$cfgFile = str_replace ('@@authRecover@@', isset ($_POST ['authRecover']) ? 'TRUE' : 'FALSE', $cfgFile);
 

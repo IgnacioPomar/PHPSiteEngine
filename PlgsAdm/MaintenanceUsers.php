@@ -36,8 +36,7 @@ class MaintenanceUsers extends Plugin
 	 */
 	private function showListUsers ()
 	{
-		$query = $this->getQueryUsers ();
-		$resultUsers = $this->context->mysqli->query ($query);
+		$resultUsers = $this->runQueryUsers ();
 
 		$formatter = new ColumnFormatter (self::COLS_TABLE_USERS);
 		$formatter->stylers ['isActive'] = new FormatterColumnToCheckbox ();
@@ -66,24 +65,27 @@ class MaintenanceUsers extends Plugin
 
 	/**
 	 *
-	 * @param number $idUser
-	 * @return string
+	 * @param string $idUser
+	 * @return \mysqli_result|false
 	 */
-	private function getQueryUsers ($idUser = 0)
+	private function runQueryUsers ($idUser = '')
 	{
 		// YAGNI: Receive an array with the necessary columns
 		$query = 'SELECT u.*,g.groups  FROM weUsers u ';
 		$query .= ' LEFT JOIN  (SELECT GROUP_CONCAT(grpName  SEPARATOR ", ") AS groups, rel.idUser FROM weGroups g INNER JOIN weUsersGroups rel ON g.idGrp = rel.idGrp GROUP BY rel.idUser) g';
 		$query .= ' ON u.idUser=g.idUser ';
-		if ($idUser != 0)
+
+		if ($idUser !== '' && $idUser !== 0 && $idUser !== null)
 		{
-			$query .= " WHERE u.idUser = $idUser";
+			$query .= ' WHERE u.idUser = ?';
+			$stmt = $this->context->mysqli->prepare ($query);
+			$stmt->bind_param ('s', $idUser);
+			$stmt->execute ();
+			return $stmt->get_result ();
 		}
-		else
-		{
-			$query .= ' ORDER BY isActive DESC, isAdmin DESC, name ';
-		}
-		return $query;
+
+		$query .= ' ORDER BY isActive DESC, isAdmin DESC, name ';
+		return $this->context->mysqli->query ($query);
 	}
 
 
@@ -120,8 +122,7 @@ class MaintenanceUsers extends Plugin
 
 		if (! empty ($_GET ['idUser']))
 		{
-			$query = $this->getQueryUsers ($_GET ['idUser']);
-			if ($resultUser = $this->context->mysqli->query ($query))
+			if ($resultUser = $this->runQueryUsers ($_GET ['idUser']))
 			{
 				if ($user = $resultUser->fetch_assoc ())
 				{
@@ -188,10 +189,14 @@ class MaintenanceUsers extends Plugin
 
 	private function getGroups ()
 	{
-		$query = array ();
-		$query [] = 'SELECT g.*, !ISNULL(u.idUser) AS withIt FROM weGroups g';
-		$query [] = 'LEFT JOIN   weUsersGroups  u ON g.idGrp = u.idGrp AND  idUser=' . ($_GET ['idUser'] ?? 0);
-		$resultGroups = $this->context->mysqli->query (join (' ', $query));
+		$idUser = $_GET ['idUser'] ?? '';
+		$query = 'SELECT g.*, !ISNULL(u.idUser) AS withIt FROM weGroups g';
+		$query .= ' LEFT JOIN   weUsersGroups  u ON g.idGrp = u.idGrp AND  idUser=?';
+
+		$stmt = $this->context->mysqli->prepare ($query);
+		$stmt->bind_param ('s', $idUser);
+		$stmt->execute ();
+		$resultGroups = $stmt->get_result ();
 
 		return $resultGroups->fetch_all (MYSQLI_ASSOC);
 	}
@@ -240,15 +245,20 @@ class MaintenanceUsers extends Plugin
 
 	private function updateTableUsersGroups ($idUser)
 	{
-		$query = "DELETE FROM weUsersGroups WHERE idUser = $idUser";
-		$this->context->mysqli->query ($query);
+		$idUser = (string) $idUser;
+		$query = 'DELETE FROM weUsersGroups WHERE idUser = ?';
+		$stmt = $this->context->mysqli->prepare ($query);
+		$stmt->bind_param ('s', $idUser);
+		$stmt->execute ();
 
 		if (! empty ($_POST ['groups']))
 		{
+			$insertStmt = $this->context->mysqli->prepare ('INSERT INTO weUsersGroups (idUser, idGrp) VALUES (?,?)');
 			foreach ($_POST ['groups'] as $idGrp)
 			{
-				$query = "INSERT INTO weUsersGroups (idUser, idGrp) VALUES ($idUser,$idGrp)";
-				$this->context->mysqli->query ($query);
+				$idGrp = (int) $idGrp;
+				$insertStmt->bind_param ('si', $idUser, $idGrp);
+				$insertStmt->execute ();
 			}
 		}
 	}
