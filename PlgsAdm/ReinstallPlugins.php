@@ -11,6 +11,13 @@ class ReinstallPlugins extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Reinstala y registra de nuevo todos los plugins del sistema.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 
 

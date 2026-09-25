@@ -267,6 +267,13 @@ class MaintenanceUsers extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Permite crear, editar y listar los usuarios y asignarles grupos.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 
 

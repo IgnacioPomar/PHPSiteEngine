@@ -11,6 +11,13 @@ class ReinstallCore extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Reinstala las tablas principales del núcleo del sistema.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 
 

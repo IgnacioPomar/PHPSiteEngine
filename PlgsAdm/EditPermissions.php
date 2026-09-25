@@ -447,6 +447,13 @@ class EditPermissions extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Permite gestionar los permisos de grupos y usuarios sobre cada nodo del menú.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 
 

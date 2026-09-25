@@ -174,6 +174,13 @@ class MaintenanceGroups extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Permite crear, editar y listar los grupos de usuarios.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 
 

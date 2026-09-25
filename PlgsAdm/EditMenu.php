@@ -469,7 +469,7 @@ class EditMenu extends Plugin
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
-				$this->nodesWithOpts [$row ['mnuNode']] [$row ['plgName']] = $row ['paramValues'];
+				$this->configuredNodes [$row ['mnuNode']] [$row ['plgName']] = $row ['paramValues'];
 			}
 		}
 	}
@@ -603,9 +603,9 @@ class EditMenu extends Plugin
 				{
 					$base64Nde = rtrim (strtr (base64_encode ($opc ['opc']), '+/', '-_'), '=');
 					$retVal .= '<a href="' . $this->uriPrefix . 'acc=editParams&node=' . $base64Nde . '">Edit Params <span class="PopupInfo">';
-					if (isset ($this->nodesWithOpts [$opc ['opc']] [$opc ['plg']]))
+					if (isset ($this->configuredNodes [$opc ['opc']] [$opc ['plg']]))
 					{
-						$retVal .= $this->showCurrentNodeParams ($this->nodesWithOpts [$opc ['opc']] [$opc ['plg']], $this->plgssWithParams [$opc ['plg']]);
+						$retVal .= $this->showCurrentNodeParams ($this->configuredNodes [$opc ['opc']] [$opc ['plg']], $this->plgssWithParams [$opc ['plg']]);
 					}
 					else
 					{
@@ -707,5 +707,12 @@ class EditMenu extends Plugin
 
 	public static function getPlgInfo (): array
 	{
+		$plgInfo = array ();
+		$plgInfo ['plgDescription'] = "Permite editar la estructura del menú y los parámetros de cada nodo.";
+		$plgInfo ['isMenu'] = 1;
+		$plgInfo ['perms'] = '[]';
+		$plgInfo ['params'] = '[]';
+
+		return $plgInfo;
 	}
 }
