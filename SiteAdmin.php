@@ -98,7 +98,16 @@ class SiteAdmin
 	private function checkBaseTables ()
 	{
 		$sql = 'SELECT 1 FROM weUsers LIMIT 1;';
-		if (! $resultado = $this->context->mysqli->query ($sql))
+		try
+		{
+			$resultado = $this->context->mysqli->query ($sql);
+		}
+		catch (\mysqli_sql_exception $e)
+		{
+			$resultado = false;
+		}
+
+		if (! $resultado)
 		{
 			$installer = new Installer ($this->context->mysqli);
 			$installer->installWithConfigFile ();

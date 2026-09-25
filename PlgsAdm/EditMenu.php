@@ -584,7 +584,9 @@ class EditMenu extends Plugin
 			else
 			{
 				// Menu options
-				if ($this->isEditable)
+				// Synthetic fallback nodes (Menu::getEmptyMenu(), used when weMenu has no rows)
+				// have no idNodo, since they are not real DB rows and cannot be edited.
+				if ($this->isEditable && isset ($opc ['idNodo']))
 				{
 					// YAGNI: convert in FORMs with post send
 					// links for Delete/Move/Create nodes

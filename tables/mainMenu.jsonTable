@@ -4,9 +4,9 @@
 		"idNodo":		{"type": "auto"},
 		"idNodoParent":	{"type": "int", "label": "Nodo padre"},
 		"uri": 			{"type": "string", "lenght": 255, "label": "URL"},
-		"plg":			{"type": "string", "lenght": 255, "label": "Plugin", "formType":"combo@EditMenu::getPlugins"},
+		"plg":			{"type": "string", "lenght": 255, "label": "Plugin", "formType":"combo@PHPSiteEngine\\PlgsAdm\\EditMenu::getPlugins"},
 		"name":			{"type": "string", "lenght": 255, "label": "Page title"},
-		"tmplt":		{"type": "string", "lenght": 255, "label": "Template", "formType":"combo@EditMenu::getTemplates"},
+		"tmplt":		{"type": "string", "lenght": 255, "label": "Template", "formType":"combo@PHPSiteEngine\\PlgsAdm\\EditMenu::getTemplates"},
 		"menuOrder":	{"type": "int"},
 		"isVisible":	{"type": "bool", "label": "Show in menu tree"},
 		"isEnable":		{"type": "bool", "label": "Activo"}
