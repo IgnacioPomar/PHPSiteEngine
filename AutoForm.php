@@ -415,6 +415,7 @@ class AutoForm
 					return (is_numeric ($val)) ? $val : 'NULL';
 				}
 				break;
+			case 'float':
 			case 'double':
 			case 'auto':
 			case 'int':

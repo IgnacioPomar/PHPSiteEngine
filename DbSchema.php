@@ -110,6 +110,8 @@ class DbSchema
 					return " text DEFAULT $defVal";
 				}
 				break;
+			default:
+				throw new \InvalidArgumentException ("Tipo de columna desconocido: {$field ['type']}");
 		}
 	}
 

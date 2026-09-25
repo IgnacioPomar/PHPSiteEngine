@@ -50,7 +50,7 @@ class Logout extends Plugin
 	public static function getPlgInfo (): array
 	{
 		$plgInfo = array ();
-		$plgInfo ['plgDescription'] = "Muestra el día de hoy";
+		$plgInfo ['plgDescription'] = "Logs the current user out";
 		$plgInfo ['isMenu'] = 1;
 		$plgInfo ['perms'] = '[]';
 		$plgInfo ['params'] = '[]';

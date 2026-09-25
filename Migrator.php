@@ -37,7 +37,7 @@ class Migrator
 		}
 		else
 		{
-			echo '<div class="fail"><b>Error</b>: Unablle to create  equivalent codes.<br />: ' . $this->mysqli->error . '</div>';
+			echo '<div class="fail"><b>Error</b>: Unablle to create  equivalent codes.<br />: ' . $this->context->mysqli->error . '</div>';
 			return FALSE;
 		}
 
@@ -49,7 +49,7 @@ class Migrator
 		}
 		else
 		{
-			echo '<div class="fail"><b>Error</b>: Unablle to fill equivalent codes.<br />: ' . $this->mysqli->error . '</div>';
+			echo '<div class="fail"><b>Error</b>: Unablle to fill equivalent codes.<br />: ' . $this->context->mysqli->error . '</div>';
 			return FALSE;
 		}
 

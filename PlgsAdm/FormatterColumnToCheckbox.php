@@ -22,7 +22,7 @@ class FormatterColumnToCheckbox
 			$attributes [] = 'checked';
 		}
 
-		$retVal .= '<input type="checkbox"' . join (' ', $attributes) . '>';
+		$retVal .= '<input type="checkbox" ' . join (' ', $attributes) . '>';
 		$retVal .= '</div>';
 		return $retVal;
 	}
