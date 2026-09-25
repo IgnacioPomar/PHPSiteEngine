@@ -9,6 +9,7 @@ require_once ('WebEngine.php');
 require_once ('Auth.php');
 
 // Include for the Plugin
+require_once ('Html.php');
 require_once ('ColumnFormatter.php');
 require_once ('AutoForm.php');
 

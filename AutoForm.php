@@ -85,7 +85,7 @@ class AutoForm
 		{
 			// ---------- Must return inmediatlely ------------
 			case 'hidden':
-				return '<input type="hidden" name="' . $fieldName . '" value="' . $val . '" />' . PHP_EOL;
+				return '<input type="hidden" name="' . $fieldName . '" value="' . Html::e ($val) . '" />' . PHP_EOL;
 				break;
 			case 'separator':
 				return '<hr />' . PHP_EOL;
@@ -95,11 +95,11 @@ class AutoForm
 			case 'textarea':
 				if ($inputDisabled)
 				{
-					$retVal = '<pre >' . $val . '</pre>';
+					$retVal = '<pre >' . Html::e ($val) . '</pre>';
 				}
 				else
 				{
-					$retVal = '<textarea id="' . $fieldName . '" name="' . $fieldName . '" >' . $val . '</textarea>';
+					$retVal = '<textarea id="' . $fieldName . '" name="' . $fieldName . '" >' . Html::e ($val) . '</textarea>';
 				}
 				return $prefix . $retVal . $sufix;
 				break;
@@ -163,7 +163,7 @@ class AutoForm
 				break;
 		}
 
-		$retVal = '<input id="' . $fieldName . '"  name="' . $fieldName . '"  type="' . $type . '"  value="' . $val . '" ' . join (' ', $params) . '>';
+		$retVal = '<input id="' . $fieldName . '"  name="' . $fieldName . '"  type="' . $type . '"  value="' . Html::e ($val) . '" ' . join (' ', $params) . '>';
 		return $prefix . $retVal . $sufix;
 	}
 
@@ -182,8 +182,8 @@ class AutoForm
 		$realVal = (is_numeric ($val)) ? $val : 0;
 		// El parametro recibido es una clase con los dtaos necesarios
 		// Un searchBox se compone de un hidden con el ID real, del lable, del input (deahabilitado), y de un boton
-		$retVal = '<input type="hidden" id="' . $fieldName . '" name="' . $fieldName . '" value="' . $realVal . '" />';
-		$retVal .= '<input id="' . $fieldName . '_Text" value="' . $myclass->getTextVal ($this->mysqli, $realVal) . '"  disabled="" class="searchBox">';
+		$retVal = '<input type="hidden" id="' . $fieldName . '" name="' . $fieldName . '" value="' . Html::e ($realVal) . '" />';
+		$retVal .= '<input id="' . $fieldName . '_Text" value="' . Html::e ($myclass->getTextVal ($this->mysqli, $realVal)) . '"  disabled="" class="searchBox">';
 		if (! $inputDisabled)
 		{
 			$retVal .= '<button type="button" id="' . $fieldName . '_Btn" >...</button>';
@@ -271,7 +271,7 @@ class AutoForm
 		if ($inputDisabled)
 		{
 			$inputVal = $arr [$val] ?? '';
-			return $prefix . '<input   type="string"  value="' . $inputVal . '" disabled>' . $sufix;
+			return $prefix . '<input   type="string"  value="' . Html::e ($inputVal) . '" disabled>' . $sufix;
 		}
 		else
 		{
@@ -279,7 +279,7 @@ class AutoForm
 			foreach ($arr as $clave => $valorOp)
 			{
 				$selected = ($val == $clave) ? 'selected' : '';
-				$retVal .= '<option value="' . $clave . '" ' . $selected . '>' . $valorOp . '</option>';
+				$retVal .= '<option value="' . Html::e ($clave) . '" ' . $selected . '>' . Html::e ($valorOp) . '</option>';
 			}
 			return $prefix . $retVal . '</select>' . $sufix;
 		}
@@ -300,7 +300,7 @@ class AutoForm
 			{
 				if (in_array ($clave, $val))
 				{
-					$retVal .= '<span class="multOpc">' . $valorOp . '</span>';
+					$retVal .= '<span class="multOpc">' . Html::e ($valorOp) . '</span>';
 				}
 			}
 			return $prefix . $retVal . $sufix;
@@ -312,7 +312,7 @@ class AutoForm
 			foreach ($arr as $clave => $valorOp)
 			{
 				$selected = (in_array ($clave, $val)) ? 'selected' : '';
-				$retVal .= '<option value="' . $clave . '" ' . $selected . '>' . $valorOp . '</option>';
+				$retVal .= '<option value="' . Html::e ($clave) . '" ' . $selected . '>' . Html::e ($valorOp) . '</option>';
 			}
 			return $prefix . $retVal . '</select>' . $sufix;
 		}
@@ -324,7 +324,7 @@ class AutoForm
 		$retVal = '';
 		foreach ($this->hiddenFields as $key => $value)
 		{
-			$retVal .= '<input type="hidden" name="' . $key . '" value="' . $value . '" />' . PHP_EOL;
+			$retVal .= '<input type="hidden" name="' . $key . '" value="' . Html::e ($value) . '" />' . PHP_EOL;
 		}
 
 		return $retVal;
@@ -342,7 +342,7 @@ class AutoForm
 	{
 		$action = $_SERVER ['REQUEST_URI'];
 		$extra = ($isDisabled) ? ' disabled ' : '';
-		$retVal = '<form action="' . $action . '" method="post" autocomplete="off" class="autoform' . $extra . '">';
+		$retVal = '<form action="' . Html::e ($action) . '" method="post" autocomplete="off" class="autoform' . $extra . '">';
 		$retVal .= $this->getExtraHiddenFields ();
 
 		$retVal .= $this->externalHeadHTML;

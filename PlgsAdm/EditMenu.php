@@ -6,6 +6,7 @@ use PHPSiteEngine\Context;
 use PHPSiteEngine\Plugin;
 use PHPSiteEngine\AutoForm;
 use PHPSiteEngine\Site;
+use PHPSiteEngine\Html;
 
 class EditMenu extends Plugin
 {
@@ -124,7 +125,7 @@ class EditMenu extends Plugin
 			{
 				$retVal .= self::getOpcFullInfo ($opc);
 				$retVal .= '<form action="' . $this->uriPrefix . 'acc=delete" method="post" autocomplete="off">' . PHP_EOL;
-				$retVal .= '<input type="hidden" name="nodeId" value="' . $_GET ['nodeId'] . '" />' . PHP_EOL;
+				$retVal .= '<input type="hidden" name="nodeId" value="' . Html::e ($_GET ['nodeId']) . '" />' . PHP_EOL;
 				$retVal .= '<input type="hidden" name="deleteConfirmed" value="confirmed" />' . PHP_EOL;
 				$retVal .= '<button class="btn" type="submit" value="Confirm">Confirm</button>';
 				$retVal .= '</form>';
@@ -422,9 +423,9 @@ class EditMenu extends Plugin
 		$paramDef = json_decode ($nodeVals ['definition'], true);
 
 		// Finally, we return the values
-		$retVal = '<h1>Edit node Parameters [' . $node . ']</h1>';
+		$retVal = '<h1>Edit node Parameters [' . Html::e ($node) . ']</h1>';
 		$retVal .= '<form action="' . $this->uriPrefix . 'acc=editParams' . '" method="post" autocomplete="off">' . PHP_EOL;
-		$retVal .= '<input type="hidden" name="node" value="' . $_GET ['node'] . '" />' . PHP_EOL;
+		$retVal .= '<input type="hidden" name="node" value="' . Html::e ($_GET ['node']) . '" />' . PHP_EOL;
 
 		$autof = new AutoForm (null);
 		foreach ($paramDef as $param)
@@ -489,7 +490,7 @@ class EditMenu extends Plugin
 		$retVal = '';
 		foreach ($paramValues as $paramName => $paramValue)
 		{
-			$retVal .= '<b>' . $paramName . '</b>: ' . $paramValue . '<br >';
+			$retVal .= '<b>' . Html::e ($paramName) . '</b>: ' . Html::e ($paramValue) . '<br >';
 		}
 		return $retVal;
 	}
@@ -498,8 +499,8 @@ class EditMenu extends Plugin
 	private function actionForm ($action, $idNodo, $text, $hiddenOpcs = '')
 	{
 		$retVal = '<form action="' . $this->uriPrefix . '" method="post" autocomplete="off">' . PHP_EOL;
-		$retVal .= '<input type="hidden" name="acc" value="' . $action . '" />' . PHP_EOL;
-		$retVal .= '<input type="hidden" name="nodeId" value="' . $idNodo . '" />' . PHP_EOL;
+		$retVal .= '<input type="hidden" name="acc" value="' . Html::e ($action) . '" />' . PHP_EOL;
+		$retVal .= '<input type="hidden" name="nodeId" value="' . Html::e ($idNodo) . '" />' . PHP_EOL;
 		$extraClass = '';
 		if (is_array ($hiddenOpcs))
 		{
@@ -511,11 +512,11 @@ class EditMenu extends Plugin
 				}
 				else
 				{
-					$retVal .= '<input type="hidden" name="' . $opc . '" value="' . $val . '" />' . PHP_EOL;
+					$retVal .= '<input type="hidden" name="' . $opc . '" value="' . Html::e ($val) . '" />' . PHP_EOL;
 				}
 			}
 		}
-		$retVal .= '<button class="btn ' . $action . $extraClass . '" type="submit" value="exec" title="' . $text . '">' . $text . '</button>';
+		$retVal .= '<button class="btn ' . $action . $extraClass . '" type="submit" value="exec" title="' . Html::e ($text) . '">' . Html::e ($text) . '</button>';
 		$retVal .= '</form>';
 
 		return $retVal;
@@ -525,11 +526,11 @@ class EditMenu extends Plugin
 	private static function getOpcFullInfo (array &$opc)
 	{
 		$fullInfo = '<span class="PopupInfo">';
-		$fullInfo .= '<b>NodeId</b>:' . ($opc ['opc'] ?? 'N/A') . '<br />';
-		$fullInfo .= '<b>Plugin</b>:' . ($opc ['plg'] ?? 'N/A') . '<br />';
+		$fullInfo .= '<b>NodeId</b>:' . Html::e ($opc ['opc'] ?? 'N/A') . '<br />';
+		$fullInfo .= '<b>Plugin</b>:' . Html::e ($opc ['plg'] ?? 'N/A') . '<br />';
 		$fullInfo .= '<b>Show In tree</b>:' . (($opc ['show'] == 1) ? 'true' : 'false') . '<br />';
-		$fullInfo .= '<b>title</b>:' . ($opc ['name'] ?? 'N/A') . '<br />';
-		$fullInfo .= '<b>template</b>:' . ($opc ['tmplt'] ?? 'N/A') . '<br />';
+		$fullInfo .= '<b>title</b>:' . Html::e ($opc ['name'] ?? 'N/A') . '<br />';
+		$fullInfo .= '<b>template</b>:' . Html::e ($opc ['tmplt'] ?? 'N/A') . '<br />';
 		$fullInfo .= '</span>';
 
 		return $fullInfo;
@@ -570,8 +571,8 @@ class EditMenu extends Plugin
 
 			$fullInfo = self::getOpcFullInfo ($opc);
 
-			$retVal .= '<div class="menuNode ' . $extraClass . '"><span class="nodeId">' . $txtNodeId . '</span>';
-			$retVal .= '<span class="nodeName">' . $ident . $opc ['name'] . $fullInfo . '</span>';
+			$retVal .= '<div class="menuNode ' . $extraClass . '"><span class="nodeId">' . Html::e ($txtNodeId) . '</span>';
+			$retVal .= '<span class="nodeName">' . $ident . Html::e ($opc ['name']) . $fullInfo . '</span>';
 
 			if (! $isEnabled)
 			{
@@ -592,8 +593,8 @@ class EditMenu extends Plugin
 					$retVal .= $this->actionForm ('orderCgh', $opc ['idNodo'], 'Up', array ('d' => 0, 'cls' => 'up'));
 					$retVal .= $this->actionForm ('orderCgh', $opc ['idNodo'], 'Down', array ('d' => 1, 'cls' => 'down'));
 
-					$retVal .= '<a href="' . $this->uriPrefix . 'acc=edit&nodeId=' . $opc ['idNodo'] . '" class="edit" title="Edit Node">Edit</a>';
-					$retVal .= '<a href="' . $this->uriPrefix . 'acc=delete&nodeId=' . $opc ['idNodo'] . '" class="delete" title="Delete Node">Delete</a>';
+					$retVal .= '<a href="' . $this->uriPrefix . 'acc=edit&nodeId=' . Html::e ($opc ['idNodo']) . '" class="edit" title="Edit Node">Edit</a>';
+					$retVal .= '<a href="' . $this->uriPrefix . 'acc=delete&nodeId=' . Html::e ($opc ['idNodo']) . '" class="delete" title="Delete Node">Delete</a>';
 					$retVal .= '</span>';
 				}
 

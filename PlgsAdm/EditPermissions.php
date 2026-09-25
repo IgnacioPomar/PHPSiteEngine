@@ -4,6 +4,7 @@ namespace PHPSiteEngine\PlgsAdm;
 
 use PHPSiteEngine\Context;
 use PHPSiteEngine\Plugin;
+use PHPSiteEngine\Html;
 
 class EditPermissions extends Plugin
 {
@@ -172,8 +173,8 @@ class EditPermissions extends Plugin
 				$txtNodeId .= ' (disabled)';
 			}
 
-			$retVal .= '<div class="menuNode ' . $extraClass . '"><span class="nodeId">' . $txtNodeId . '</span>';
-			$retVal .= '<span class="nodeName">' . $ident . $opc ['name'] . '</span>';
+			$retVal .= '<div class="menuNode ' . $extraClass . '"><span class="nodeId">' . Html::e ($txtNodeId) . '</span>';
+			$retVal .= '<span class="nodeName">' . $ident . Html::e ($opc ['name']) . '</span>';
 
 			if ($this->isEditable)
 			{
@@ -202,7 +203,7 @@ class EditPermissions extends Plugin
 				$extraPerms = json_decode ($this->plgssWithPerms [$opc ['plg']], true);
 				foreach ($extraPerms as $perm)
 				{
-					$retVal .= '<div class="pluginNode"><span class="nodeId"></span><span class="nodeName">' . $ident . '<span class="pluginPerm">' . $perm . '</span></span>';
+					$retVal .= '<div class="pluginNode"><span class="nodeId"></span><span class="nodeName">' . $ident . '<span class="pluginPerm">' . Html::e ($perm) . '</span></span>';
 
 					$defVal = $this->getStoredValue ($opc ['opc'], $opc ['plg'], $perm);
 					$id = self::inputIdEncode ($opc ['opc'], $opc ['plg'], $perm);
@@ -356,9 +357,9 @@ class EditPermissions extends Plugin
 			}
 		}
 
-		$hiddenInput = '<input type="hidden" name="idGrp" value="' . $idGrp . '" />';
+		$hiddenInput = '<input type="hidden" name="idGrp" value="' . Html::e ($idGrp) . '" />';
 
-		return $this->getMainMenu ('group <hlight>' . $grpName . '</hlight>', $hiddenInput);
+		return $this->getMainMenu ('group <hlight>' . Html::e ($grpName) . '</hlight>', $hiddenInput);
 	}
 
 
@@ -382,9 +383,9 @@ class EditPermissions extends Plugin
 			}
 		}
 
-		$hiddenInput = '<input type="hidden" name="idUsr" value="' . $idUsr . '" />';
+		$hiddenInput = '<input type="hidden" name="idUsr" value="' . Html::e ($idUsr) . '" />';
 
-		return $this->getMainMenu ('user <hlight>' . $usrName . '</hlight> (<dlight>' . $usrGroups . '</dlight>)', $hiddenInput);
+		return $this->getMainMenu ('user <hlight>' . Html::e ($usrName) . '</hlight> (<dlight>' . Html::e ($usrGroups) . '</dlight>)', $hiddenInput);
 	}
 
 
@@ -403,7 +404,7 @@ class EditPermissions extends Plugin
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
-				$retVal .= '<a href="' . $this->uriPrefix . 'idGrp=' . $row ['idGrp'] . '"><div>' . $row ['grpName'] . '</div></a>' . PHP_EOL;
+				$retVal .= '<a href="' . $this->uriPrefix . 'idGrp=' . Html::e ($row ['idGrp']) . '"><div>' . Html::e ($row ['grpName']) . '</div></a>' . PHP_EOL;
 			}
 		}
 		$retVal .= '</span>';
@@ -417,7 +418,7 @@ class EditPermissions extends Plugin
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
-				$retVal .= '<a href="' . $this->uriPrefix . 'idUsr=' . $row ['idUser'] . '"><div>' . $row ['name'] . ' <span class="groups">(' . $row ['groups'] . ')</span></div></a>' . PHP_EOL;
+				$retVal .= '<a href="' . $this->uriPrefix . 'idUsr=' . Html::e ($row ['idUser']) . '"><div>' . Html::e ($row ['name']) . ' <span class="groups">(' . Html::e ($row ['groups']) . ')</span></div></a>' . PHP_EOL;
 			}
 		}
 		$retVal .= '</span>';

@@ -11,6 +11,7 @@ require_once ('MenuLoaderDB.php'); // if ($GLOBALS ['menuType'] != 0)
 require_once ('Auth.php');
 
 // Include for the admin plugins
+require_once ('Html.php');
 require_once ('ColumnFormatter.php');
 require_once ('AutoForm.php');
 require_once ('PlgsAdm/FormatterColumnToCheckbox.php');

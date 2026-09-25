@@ -162,7 +162,7 @@ class ColumnFormatter
 				$val = $row [$fld];
 			}
 
-			$retVal .= '<span class="' . $col [0] . '">' . $val . '</span>';
+			$retVal .= '<span class="' . $col [0] . '">' . Html::e ($val) . '</span>';
 		}
 		return $retVal;
 	}
@@ -186,7 +186,7 @@ class ColumnFormatter
 			}
 			else
 			{
-				$retVal .= '<span class="' . $col [0] . '">' . $val . '</span>';
+				$retVal .= '<span class="' . $col [0] . '">' . Html::e ($val) . '</span>';
 			}
 		}
 		return $retVal;
