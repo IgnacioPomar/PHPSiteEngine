@@ -2,6 +2,7 @@
 plgs/*
 skins/*
 cfg/*
+.devcontainer/host.env
 
 # Except this files
 !plgs/index.htm

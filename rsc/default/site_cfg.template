@@ -4,7 +4,7 @@
  */
 
 // site Version
-$GLOBALS ['Version'] = '0.2';
+$GLOBALS ['Version'] = '0.3';
 
 // Options
 $GLOBALS ['authRecover'] = @@authRecover@@;

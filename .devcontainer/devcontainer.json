@@ -1,0 +1,47 @@
+{
+    "name": "LAMP",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "php-app",
+
+    "workspaceMount": "source=${localWorkspaceFolder},target=/PHPSiteEngine,type=bind",
+    "workspaceFolder": "/PHPSiteEngine",
+
+    "initializeCommand": "bash -c 'ip -4 route get 1.1.1.1 2>/dev/null | awk \"{for (i = 1; i <= NF; i++) if (\\$i == \\\"src\\\") {print \\\"HOST_LAN_IP=\\\" \\$(i + 1); exit}}\" > .devcontainer/host.env'",
+
+    "shutdownAction": "stopCompose",
+    "remoteUser": "vscode",
+
+    "forwardPorts": [
+        9081
+    ],
+
+    "portsAttributes": {
+        "9081": {
+            "label": "Apache",
+            "onAutoForward": "notify"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "xdebug.php-debug",
+                "esbenp.prettier-vscode",
+                "editorconfig.editorconfig",
+
+                "anthropic.claude-code",
+                "openai.chatgpt"
+            ],
+
+            "settings": {
+                "editor.formatOnSave": true,
+                "php.validate.executablePath": "/usr/local/bin/php",
+
+                "claudeCode.initialPermissionMode": "plan"
+            }
+        }
+    },
+
+    "postCreateCommand": "bash /PHPSiteEngine/.devcontainer/setup.sh"
+}
