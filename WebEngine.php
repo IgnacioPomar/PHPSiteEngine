@@ -9,8 +9,8 @@ class WebEngine
 	// @formatter:off
 	const HARDCODED_PLUGINS = array(
 			// 'name' => 'path',
-			'/Logout'		=> ['file' =>'PlgsStd/Logout.php', 'class' => 'Logout'],
-			'/'				=> ['file' =>'PlgsStd/EmptyContent.php', 'class' => 'EmptyContent'],
+			'/Logout'		=> ['file' =>'PlgsInfra/Logout.php', 'class' => 'Logout'],
+			'/'				=> ['file' =>'PlgsInfra/EmptyContent.php', 'class' => 'EmptyContent'],
 	);
 	
 	// @formatter:on
@@ -118,7 +118,7 @@ class WebEngine
 			$plgInfo = self::HARDCODED_PLUGINS [$mnu->subPath];
 
 			require_once (Site::$nsPath . $plgInfo ['file']);
-			$plgName = 'PHPSiteEngine\\PlgsStd\\' . $plgInfo ['class'];
+			$plgName = 'PHPSiteEngine\\PlgsInfra\\' . $plgInfo ['class'];
 			$plg = new $plgName ($this->context);
 			// Harcoded plugins dont have nor params nor permmisions
 

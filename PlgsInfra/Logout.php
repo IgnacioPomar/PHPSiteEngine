@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPSiteEngine\PlgsStd;
+namespace PHPSiteEngine\PlgsInfra;
 
 use PHPSiteEngine\Plugin;
 
