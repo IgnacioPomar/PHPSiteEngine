@@ -186,6 +186,8 @@ class SiteAdmin
 
 		if ($this->userId !== NULL)
 		{
+			$this->context->userId = $this->userId;
+
 			// Check if we currently have an admin rights
 			if (Auth::isAdmin ($this->context->mysqli, $this->userId))
 			{

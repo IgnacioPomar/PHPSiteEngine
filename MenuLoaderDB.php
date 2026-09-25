@@ -29,18 +29,24 @@ class MenuLoaderDB
 		{
 			$query = 'SELECT m.idNodo, m.idNodoParent, m.uri AS opc, m.plg, m.isVisible AS "show" , m.name, m.tmplt FROM weMenu m ';
 			$query .= 'INNER JOIN (SELECT MIN(permValue) permVal,mnuNode,plgName FROM ';
-			$query .= "(SELECT mnuNode,plgName,permValue,permName FROM wePermissionsGroup WHERE idGrp IN (SELECT idGrp FROM weUsersGroups WHERE idUser = $userId) ";
-			$query .= "UNION ALL SELECT mnuNode,plgName,permValue,permName FROM wePermissionsUsers WHERE idUser=$userId) permUnion WHERE permName='' AND permValue <> 0 ";
+			$query .= '(SELECT mnuNode,plgName,permValue,permName FROM wePermissionsGroup WHERE idGrp IN (SELECT idGrp FROM weUsersGroups WHERE idUser = ?) ';
+			$query .= "UNION ALL SELECT mnuNode,plgName,permValue,permName FROM wePermissionsUsers WHERE idUser=?) permUnion WHERE permName='' AND permValue <> 0 ";
 			$query .= 'GROUP BY mnuNode,plgName) up ON m.uri = up.mnuNode AND m.plg = up.plgName WHERE up.permVal=1 AND isEnable=1 ';
+			$query .= 'ORDER BY idNodoParent,menuOrder;';
+
+			$stmt = $mysqli->prepare ($query);
+			$stmt->bind_param ('ss', $userId, $userId);
+			$stmt->execute ();
+			$menuDB = $stmt->get_result ()->fetch_all (MYSQLI_ASSOC);
 		}
 		else
 		{
 			$query = 'SELECT m.idNodo, m.idNodoParent, m.uri AS opc, m.plg, m.isVisible AS "show" , m.name, m.tmplt, m.isEnable FROM weMenu m ';
-		}
-		$query .= 'ORDER BY idNodoParent,menuOrder;';
+			$query .= 'ORDER BY idNodoParent,menuOrder;';
 
-		// TODO: The following code is not clear: redo
-		$menuDB = $mysqli->query ($query)->fetch_all (MYSQLI_ASSOC);
+			// TODO: The following code is not clear: redo
+			$menuDB = $mysqli->query ($query)->fetch_all (MYSQLI_ASSOC);
+		}
 
 		// Delete not real OPC
 		foreach ($menuDB as &$parentItem)

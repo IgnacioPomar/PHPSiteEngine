@@ -3,7 +3,7 @@
 	"fields": {
 		"mnuNode":		{"type": "string","lenght": 50},
 		"plgName":		{"type": "string","lenght": 50},
-		"idUser":		{"type": "int"},
+		"idUser":		{"type": "string", "lenght": 24},
 		"permName":		{"type": "string","lenght": 50},
 		"permValue":	{"type": "int"}
 	},

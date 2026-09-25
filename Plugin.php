@@ -77,14 +77,16 @@ abstract class Plugin
 	{
 		// In the database we can have 1 for allowed, and -1 for disallowed.
 		// IMPORTANT: We dont have 0 in the database, those records should be erased
-
-		// YAGNI: Create union table with group and user perms
 		$sql = 'SELECT permName, MIN(permValue) val FROM ';
-		$sql .= '((SELECT permName, permValue FROM wePermissionsUsers WHERE permValue<>0 AND idUser=' . $this->context->userId . ' AND mnuNode="' . $this->context->mnu->subPath . '") UNION ALL ';
-		$sql .= '(SELECT permName, permValue FROM wePermissionsGroup WHERE idGrp IN (SELECT idGrp FROM weUsersGroups WHERE permValue<>0 AND idUser=' . $this->context->userId . ' AND mnuNode="' . $this->context->mnu->subPath . '"))) z ';
+		$sql .= '((SELECT permName, permValue FROM wePermissionsUsers WHERE permValue<>0 AND idUser=? AND mnuNode=?) UNION ALL ';
+		$sql .= '(SELECT permName, permValue FROM wePermissionsGroup WHERE permValue<>0 AND mnuNode=? AND idGrp IN (SELECT idGrp FROM weUsersGroups WHERE idUser=?))) z ';
 		$sql .= 'GROUP BY permName;';
 
-		if ($resultado = $this->context->mysqli->query ($sql))
+		$stmt = $this->context->mysqli->prepare ($sql);
+		$stmt->bind_param ('ssss', $this->context->userId, $this->context->mnu->subPath, $this->context->mnu->subPath, $this->context->userId);
+		$stmt->execute ();
+
+		if ($resultado = $stmt->get_result ())
 		{
 			while ($row = $resultado->fetch_assoc ())
 			{
