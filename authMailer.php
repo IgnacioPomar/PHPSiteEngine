@@ -69,7 +69,7 @@ function sendRecoverEmail ($email, $pass)
 {
 	$plainLink = 'rP&rE=' . $email . '&CR=' . strtr ($pass, '-_', '+/');
 	$server = $_SERVER ['REQUEST_SCHEME'] . '://' . $_SERVER ['SERVER_NAME'];
-	$link = $server . $GLOBALS ['uriPath'] . '?recover=' . base64url_encode ($plainLink);
+	$link = $server . Site::$uriPath . '?recover=' . base64url_encode ($plainLink);
 
 	$emlRecoverFile = Site::$skinPath . 'tmplt/emlPasswordRecover.htm';
 	if (! file_exists ($emlRecoverFile))
